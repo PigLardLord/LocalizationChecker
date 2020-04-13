@@ -1,8 +1,7 @@
 import mmap
-import sys
 import os
 import datetime
-import getopt
+
 
 def getFilteredKeys(filename, keys: [str] = []):
     with open(filename) as fp:
@@ -22,19 +21,15 @@ def getFilteredKeys(filename, keys: [str] = []):
 
 def findUsedLocalizations(filename, key):
     hasValue = os.path.getsize(filename) > 0
-    if hasValue :
+    if hasValue:
         with open(filename, 'rb', 0) as file, mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ) as s:
             if s.find(key.encode()) != -1:
                 return filename
     return None
 
 
-def findInFolder(folder, key):
+def findInFolder(folder, key, extWhitelist, extBlacklist, folderWhitelist, folderBlacklist):
     resultArray = []
-    extWhitelist = ['.swift', '.h', '.m', '.xib']
-    extBlacklist = ['.strings', '.slp']
-    folderWhitelist = None
-    folderBlacklist = ['.git', 'Pods', 'Vendor']
 
     for path, _, files in os.walk(folder):
         for fileName in files:
@@ -61,7 +56,6 @@ def checkWhitelist(element, whitelist):
     return True if whitelist is None else any(x in element for x in whitelist)
 
 
-
 def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
     """
     Call in a loop to create terminal progress bar
@@ -84,23 +78,17 @@ def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=
         print()
 
 
-def checker(argv):
-    newFilepath = 'data/Localizable.strings'
-    newKeys = getFilteredKeys(newFilepath)
+def check_for_keys(keys, projectPath, extWhitelist, extBlacklist, folderWhitelist, folderBlacklist):
+    total = len(keys)
 
-    filepath = 'data/en.strings'
-    filteredKeys = getFilteredKeys(filepath, newKeys)
-
-    total = len(filteredKeys)
-
-    outputFileName = "out/localizationLog {}.txt".format(datetime.datetime.now().strftime("%Y-%m-%d h%H-m%M-s%S"))
+    outputFileName = "out/localizationLog {}.txt".format(datetime.datetime.now().strftime("%Y-%m-%d %H.%M.%S"))
     with open(outputFileName, 'a') as logFile:
-        for i, key in enumerate(filteredKeys):
+        for i, key in enumerate(keys):
 
             print(" " * 200, end='\r')
             print('\nLooking for: ' + key)
             printProgressBar(i + 1, total, 'Progress:', 'Complete')
-            results = findInFolder("/Users/gitro/ios-teamplace-client", key)
+            results = findInFolder(projectPath, key, extWhitelist, extBlacklist, folderWhitelist, folderBlacklist)
 
             print("\033[F" + " " * 200)
             print(" " * 200, end='\r')
@@ -115,28 +103,7 @@ def checker(argv):
                 print("Key \"{}\" was not found! DELETE IT".format(key))
 
 
-def main(argv):
-    inputFile = ''
-    outputFile = ''
-    try:
-        opts, args = getopt.getopt(argv, "hi:o:", ["ifile=", "ofile="])
-    except getopt.GetoptError:
-        print('test.py -i <inputfile> -o <outputFile>')
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print('test.py -i <inputfile> -o <outputFile>')
-            sys.exit()
-        elif opt in ("-i", "--ifile"):
-            inputFile = arg
-        elif opt in ("-o", "--ofile"):
-            outputFile = arg
-    print('Input file is: "{}"'.format(inputFile))
-    print('Output file is: "{}"'.format(outputFile))
-    checker(argv)
+def check(inputFile, projectPath, extWhitelist, extBlacklist, folderWhitelist, folderBlacklist):
 
-
-if __name__ == "__main__":
-    main(sys.argv[1:])
-
-# print('numero totale chiavi nuovo file: {}\nnumero totale chiavi mancanti: {}'.format(len(newKeys), len(pippo)))
+    keys = getFilteredKeys(inputFile)
+    check_for_keys(keys, projectPath, extWhitelist, extBlacklist, folderWhitelist, folderBlacklist)
