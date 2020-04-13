@@ -2,8 +2,8 @@ import argparse
 from pyproject.checker import check
 
 ap = argparse.ArgumentParser()
-ap.add_argument('-p', '--project', required=False, help='Root folder of your Xcode project')
-ap.add_argument('-i', '--input', required=False, help='Full path of ".strings" file containing keys you want to check')
+ap.add_argument('-p', '--project', required=True, help='Root folder of your Xcode project')
+ap.add_argument('-i', '--input', required=True, help='Full path of ".strings" file containing keys you want to check')
 ap.add_argument('-fw', '--folder_whitelist', required=False, nargs='+', type=str,
                 help='Folder whitelist. i.e "-fw Classes Models ViewControllers"')
 ap.add_argument('-fb', '--folder_blacklist', required=False, nargs='+', type=str,
