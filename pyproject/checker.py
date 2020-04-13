@@ -3,7 +3,7 @@ import os
 import datetime
 
 
-def getFilteredKeys(filename, keys: [str] = []):
+def get_filtered_keys(filename, keys: [str] = []):
     with open(filename) as fp:
         line = fp.readline()
         cnt = 1
@@ -19,7 +19,7 @@ def getFilteredKeys(filename, keys: [str] = []):
     return result
 
 
-def findUsedLocalizations(filename, key):
+def find_used_localizations(filename, key):
     hasValue = os.path.getsize(filename) > 0
     if hasValue:
         with open(filename, 'rb', 0) as file, mmap.mmap(file.fileno(), 0, access=mmap.ACCESS_READ) as s:
@@ -28,35 +28,35 @@ def findUsedLocalizations(filename, key):
     return None
 
 
-def findInFolder(folder, key, extWhitelist, extBlacklist, folderWhitelist, folderBlacklist):
+def find_in_folder(folder, key, extWhitelist, extBlacklist, folderWhitelist, folderBlacklist):
     resultArray = []
 
     for path, _, files in os.walk(folder):
         for fileName in files:
             ext = os.path.splitext(fileName)[1]
-            isExtInWhitelist = checkWhitelist(ext, extWhitelist)
-            isExtNotInBlacklist = checkBlacklist(ext, extBlacklist)
+            isExtInWhitelist = check_whitelist(ext, extWhitelist)
+            isExtNotInBlacklist = check_blacklist(ext, extBlacklist)
 
-            isFolderInWhiteList = checkWhitelist(path, folderWhitelist)
-            isFolderNotInBlacklist = checkBlacklist(path, folderBlacklist)
+            isFolderInWhiteList = check_whitelist(path, folderWhitelist)
+            isFolderNotInBlacklist = check_blacklist(path, folderBlacklist)
 
             if isExtInWhitelist and isFolderInWhiteList and isExtNotInBlacklist and isFolderNotInBlacklist:
                 fullPath = os.path.join(path, fileName)
-                result = findUsedLocalizations(fullPath, key)
+                result = find_used_localizations(fullPath, key)
                 if result is not None:
                     resultArray.append(result)
     return resultArray
 
 
-def checkBlacklist(element, blacklist):
+def check_blacklist(element, blacklist):
     return True if blacklist is None else all(x not in element for x in blacklist)
 
 
-def checkWhitelist(element, whitelist):
+def check_whitelist(element, whitelist):
     return True if whitelist is None else any(x in element for x in whitelist)
 
 
-def printProgressBar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
+def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', printEnd="\r"):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -87,8 +87,8 @@ def check_for_keys(keys, projectPath, extWhitelist, extBlacklist, folderWhitelis
 
             print(" " * 200, end='\r')
             print('\nLooking for: ' + key)
-            printProgressBar(i + 1, total, 'Progress:', 'Complete')
-            results = findInFolder(projectPath, key, extWhitelist, extBlacklist, folderWhitelist, folderBlacklist)
+            print_progress_bar(i + 1, total, 'Progress:', 'Complete')
+            results = find_in_folder(projectPath, key, extWhitelist, extBlacklist, folderWhitelist, folderBlacklist)
 
             print("\033[F" + " " * 200)
             print(" " * 200, end='\r')
@@ -105,5 +105,5 @@ def check_for_keys(keys, projectPath, extWhitelist, extBlacklist, folderWhitelis
 
 def check(inputFile, projectPath, extWhitelist, extBlacklist, folderWhitelist, folderBlacklist):
 
-    keys = getFilteredKeys(inputFile)
+    keys = get_filtered_keys(inputFile)
     check_for_keys(keys, projectPath, extWhitelist, extBlacklist, folderWhitelist, folderBlacklist)
