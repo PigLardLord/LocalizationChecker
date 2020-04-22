@@ -1,0 +1,14 @@
+{
+	"applinks": {
+		"apps": [],
+		"details": [{
+			"appID": "7JZJAJB67N.com.thinprint.Cortado",
+			"paths": [
+				"/i/*",
+				"/a/*",
+				"/o/*",
+				"/m/*"
+			]
+		}]
+	}
+}
